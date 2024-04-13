@@ -2,9 +2,12 @@ import gym
 from gym.utils import seeding
 from gym.spaces.discrete import Discrete
 from gym.spaces import Box
-from .room_utils import generate_room
-from .render_utils import room_to_rgb, room_to_tiny_world_rgb
+from gym_sokoban.envs.room_utils import generate_room
+from gym_sokoban.envs.render_utils import room_to_rgb, room_to_tiny_world_rgb
 import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+import time
 
 
 class SokobanEnv(gym.Env):
@@ -229,11 +232,14 @@ class SokobanEnv(gym.Env):
             return img
 
         elif 'human' in mode:
-            from gym.envs.classic_control import rendering
-            if self.viewer is None:
-                self.viewer = rendering.SimpleImageViewer()
-            self.viewer.imshow(img)
-            return self.viewer.isopen
+            plt.imshow(img)
+            plt.title('SokobanAI')
+            plt.gca().xaxis.set_visible(False)
+            plt.gca().yaxis.set_visible(False)
+            plt.ion()
+            plt.show()
+            time.sleep(5) # display for 5
+            plt.close()
 
         elif 'raw' in mode:
             arr_walls = (self.room_fixed == 0).view(np.int8)
