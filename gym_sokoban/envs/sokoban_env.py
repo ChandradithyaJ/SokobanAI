@@ -5,10 +5,8 @@ from gym.spaces import Box
 from gym_sokoban.envs.room_utils import generate_room
 from gym_sokoban.envs.render_utils import room_to_rgb, room_to_tiny_world_rgb
 import numpy as np
-from PIL import Image
 import matplotlib.pyplot as plt
 import time
-
 
 class SokobanEnv(gym.Env):
     metadata = {
@@ -49,7 +47,9 @@ class SokobanEnv(gym.Env):
         
         if reset:
             # Initialize Room
-            _ = self.reset()
+            _ = self.reset(
+                initial_state=None
+            )
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -202,26 +202,42 @@ class SokobanEnv(gym.Env):
     def _check_if_maxsteps(self):
         return (self.max_steps == self.num_env_steps)
 
-    def reset(self, second_player=False, render_mode='rgb_array'):
-        try:
-            self.room_fixed, self.room_state, self.box_mapping = generate_room(
-                dim=self.dim_room,
-                num_steps=self.num_gen_steps,
-                num_boxes=self.num_boxes,
-                second_player=second_player
-            )
-        except (RuntimeError, RuntimeWarning) as e:
-            print("[SOKOBAN] Runtime Error/Warning: {}".format(e))
-            print("[SOKOBAN] Retry . . .")
-            return self.reset(second_player=second_player, render_mode=render_mode)
+    def reset(self, initial_state, new_room=True, second_player=False, render_mode='rgb_array'):
+        if new_room:
+            try:
+                self.room_fixed, self.room_state, self.box_mapping = generate_room(
+                    dim=self.dim_room,
+                    num_steps=self.num_gen_steps,
+                    num_boxes=self.num_boxes,
+                    second_player=second_player
+                )
+            except (RuntimeError, RuntimeWarning) as e:
+                print("[SOKOBAN] Runtime Error/Warning: {}".format(e))
+                print("[SOKOBAN] Retry . . .")
+                return self.reset(
+                        initial_state=None,
+                        second_player=second_player,
+                        render_mode=render_mode
+                        )
 
-        self.player_position = np.argwhere(self.room_state == 5)[0]
-        self.num_env_steps = 0
-        self.reward_last = 0
-        self.boxes_on_target = 0
+            self.player_position = np.argwhere(self.room_state == 5)[0]
+            self.num_env_steps = 0
+            self.reward_last = 0
+            self.boxes_on_target = 0
 
-        starting_observation = self.render(render_mode)
-        return starting_observation
+            starting_observation = self.render(render_mode)
+            return starting_observation
+        
+        else:
+            self.room_fixed = initial_state['room_fixed']
+            self.room_state = initial_state['room_state']
+            self.box_mapping = initial_state['box_mapping']
+            self.player_position = initial_state['player_position']
+            self.num_env_steps = initial_state['num_env_steps']
+            self.reward_last = initial_state['reward_last']
+            self.boxes_on_target = initial_state['boxes_on_target']
+            starting_observation = self.render(render_mode)
+            return starting_observation
 
     def render(self, mode='human', close=None, scale=1):
         assert mode in RENDERING_MODES
@@ -232,14 +248,16 @@ class SokobanEnv(gym.Env):
             return img
 
         elif 'human' in mode:
+            plt.clf()
             plt.imshow(img)
             plt.title('SokobanAI')
             plt.gca().xaxis.set_visible(False)
             plt.gca().yaxis.set_visible(False)
             plt.ion()
-            plt.show()
-            time.sleep(5) # display for 5
-            plt.close()
+            plt.show(block=False)
+            plt.pause(2) # display for 2s
+            # plt.imsave(f'{time.time()}.jpg', img)
+            # return img
 
         elif 'raw' in mode:
             arr_walls = (self.room_fixed == 0).view(np.int8)
