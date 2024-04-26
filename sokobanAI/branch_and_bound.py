@@ -43,13 +43,6 @@ def BranchAndBound(env, curSearchNode, curPenalty, PATH_PENALTY):
                                 curSearchNode.penalty - reward,
                                 action_code,
                             ))
-        # reset to the initial state
-        # env.reset(
-        #     initial_state=initial_state,
-        #     new_room=False
-        # )
-        # if not np.array_equal(initial_state['room_fixed'], env.room_fixed):
-        #     print('ERROR!')
         del env_copy
        
     while not children.empty():
@@ -64,9 +57,4 @@ def BranchAndBound(env, curSearchNode, curPenalty, PATH_PENALTY):
                 curPenalty + child.penalty, 
                 PATH_PENALTY
             )
-            
-        # env.reset(
-        #     initial_state=initial_state,
-        #     new_room=False
-        # )
         del env_copy
