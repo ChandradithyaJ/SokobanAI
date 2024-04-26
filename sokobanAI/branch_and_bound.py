@@ -34,7 +34,7 @@ def BranchAndBound(env, curSearchNode, curPenalty, PATH_PENALTY):
         possible_change_inducing_actions, 
         len(possible_change_inducing_actions)
     )
-    for action_code in range(len(shuffle_possible_actions)):
+    for action_code in shuffle_possible_actions:
         env_copy = copy.deepcopy(env)
         _, reward, _, _ = env_copy.step(action_code)
         # consider move only if the player is moving
