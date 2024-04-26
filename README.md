@@ -1,6 +1,6 @@
 # SokobanAI
 
-A Sokoban AI solver using the [gym-sokoban]((https://github.com/mpSchrader/gym-sokoban)) environment. Uses the reward values from the gym-sokoban environment to compute edge weights. The Branch and Bound algorithm was employed.
+A Sokoban AI solver using the [gym-sokoban](https://github.com/mpSchrader/gym-sokoban) environment. Uses the reward values from the gym-sokoban environment to compute edge weights. The Branch and Bound algorithm was employed.
 
 | Example Game 1 | Example Game 2 | Example Game 3 |
 | :---: | :---: | :---: 
